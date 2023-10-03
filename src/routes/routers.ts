@@ -5,6 +5,7 @@ import Hotel from "../models/hotel";
 
 const router = express.Router();
 
+
 router.get("/hotels", hotelController.getHotels);
 router.get("/all-hotels", hotelController.getAllHotels);
 router.get("/hotels/:_id/bookings", async (req, res) => {
@@ -32,10 +33,10 @@ router.get("/hotels/:hotelId", async (req, res) => {
 
   res.json(hotel);
 });
-
 router.get("/bookings/booking", bookingController.getBookings);
 router.get("/bookings", bookingController.getAllBookings);
 router.post("/bookings", bookingController.createBooking);
 router.put("/bookings/:bookingId", bookingController.updateBooking);
 router.delete("/bookings/:bookingId", bookingController.deleteBooking);
+
 export default router;

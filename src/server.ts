@@ -7,6 +7,7 @@ import bookingRoutes from "./routes/routers";
 import cors from "cors";
 
 const router = express();
+
 router.use(cors());
 
 mongoose
@@ -54,9 +55,19 @@ const startServer = () => {
     next();
   });
 
-  //Person Routes
   router.use("/", bookingRoutes);
 
+/**
+ * @openapi
+ * /healthcheck:
+ *  get:
+ *     tags:
+ *     - Healthcheck
+ *     description: Returns API operational status
+ *     responses:
+ *       200:
+ *         description: API is  running
+ */
   router.get("/healthcheck", (req, res, next) => {
     res.status(200).json({ message: "200: The API is up and running." });
   });
