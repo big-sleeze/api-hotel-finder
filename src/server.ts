@@ -3,7 +3,7 @@ import express, { urlencoded } from "express";
 import http from "http";
 import mongoose from "mongoose";
 import logger from "./library/logger";
-import bookingRoutes from "./routes/routers";
+import bookingRoutes from "./routes/routes";
 import cors from "cors";
 
 const router = express();
@@ -57,17 +57,17 @@ const startServer = () => {
 
   router.use("/", bookingRoutes);
 
-/**
- * @openapi
- * /healthcheck:
- *  get:
- *     tags:
- *     - Healthcheck
- *     description: Returns API operational status
- *     responses:
- *       200:
- *         description: API is  running
- */
+  /**
+   * @openapi
+   * /healthcheck:
+   *  get:
+   *     tags:
+   *     - Healthcheck
+   *     description: Returns API operational status
+   *     responses:
+   *       200:
+   *         description: API is  running
+   */
   router.get("/healthcheck", (req, res, next) => {
     res.status(200).json({ message: "200: The API is up and running." });
   });
