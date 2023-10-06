@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import axios, { AxiosResponse } from "axios";
 import Hotel, { IHotel } from "../models/hotel";
 import Booking, { IBooking } from "../models/booking";
+import { Schemas } from "../library/validation";
+import * as yup from "yup";
 
 export const hotelController = {
   getHotels: async (req: Request, res: Response) => {
@@ -88,6 +90,14 @@ export const hotelController = {
 
 export const bookingController = {
   createBooking: async (req: Request, res: Response) => {
+    try {
+      await Schemas.data.validate(req.body);
+    } catch (error) {
+      if (error instanceof yup.ValidationError) {
+        return res.status(400).json({ error: error.errors.join(", ") });
+      }
+    }
+
     const {
       personId,
       personFirstName,
