@@ -10,6 +10,7 @@
   "author": "E Ll",
   "license": "ISC",
   "dependencies": {
+    "@types/joi": "^17.2.3",
     "axios": "^1.4.0",
     "chalk": "^4.1.2",
     "cors": "^2.8.5",
