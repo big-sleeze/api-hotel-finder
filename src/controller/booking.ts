@@ -91,7 +91,9 @@ export const bookingController = {
   createBooking: async (req: Request, res: Response) => {
     const { error } = bookingSchema.validate(req.body, { abortEarly: false });
     if (error) {
-      const errors = error.details.map((detail) => detail.message);
+      const errors = error.details.map(
+        (detail: { message: string }) => detail.message
+      );
       return res.status(400).json({ errors });
     }
 
