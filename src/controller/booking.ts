@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import axios, { AxiosResponse } from "axios";
 import Hotel, { IHotel } from "../models/hotel";
 import Booking, { IBooking } from "../models/booking";
-import { bookingSchema } from "../library/validation";
 
 export const hotelController = {
   getHotels: async (req: Request, res: Response) => {
@@ -89,14 +88,6 @@ export const hotelController = {
 
 export const bookingController = {
   createBooking: async (req: Request, res: Response) => {
-    const { error } = bookingSchema.validate(req.body, { abortEarly: false });
-    if (error) {
-      const errors = error.details.map(
-        (detail: { message: string }) => detail.message
-      );
-      return res.status(400).json({ errors });
-    }
-
     const {
       personId,
       personFirstName,
