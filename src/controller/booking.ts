@@ -2,9 +2,7 @@ import { Request, Response } from "express";
 import axios, { AxiosResponse } from "axios";
 import Hotel, { IHotel } from "../models/hotel";
 import Booking, { IBooking } from "../models/booking";
-import dotenv from "dotenv";
-
-dotenv.config();
+import { bookingSchema } from "../library/validation";
 
 export const hotelController = {
   getHotels: async (req: Request, res: Response) => {
@@ -26,7 +24,6 @@ export const hotelController = {
         }
       );
     } catch (error) {
-      console.error(error);
       return res.status(500).json({
         error: `An error occurred while fetching hotels: ${
           (error as Error).message
@@ -36,7 +33,6 @@ export const hotelController = {
 
     if (response && response.data && response.data.items) {
       const items = response.data.items;
-      console.log(items);
       const hotelPromises = response.data.items.map(async (item: IHotel) => {
         const contact =
           item.contacts && item.contacts.length > 0 ? item.contacts[0] : {};
@@ -79,7 +75,10 @@ export const hotelController = {
       const hotels = await Promise.all(hotelPromises);
       res.json(hotels);
     } else {
-      console.error(`Invalid API response ${response}`, response);
+      return res.status(500).json({
+        error: "Invalid API response",
+        details: response,
+      });
     }
   },
   getAllHotels: async (req: Request, res: Response) => {
@@ -90,6 +89,12 @@ export const hotelController = {
 
 export const bookingController = {
   createBooking: async (req: Request, res: Response) => {
+    const { error } = bookingSchema.validate(req.body, { abortEarly: false });
+    if (error) {
+      const errors = error.details.map((detail) => detail.message);
+      return res.status(400).json({ errors });
+    }
+
     const {
       personId,
       personFirstName,
@@ -98,6 +103,33 @@ export const bookingController = {
       startDate,
       endDate,
     } = req.body;
+
+    // Convert the start and end dates to Date objects
+    const startDateObj = new Date(startDate);
+    const endDateObj = new Date(endDate);
+
+    // Get today's date and set the hours, minutes, seconds and milliseconds to 0
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Check if the start date is in the past
+    if (startDateObj < today) {
+      return res
+        .status(400)
+        .json({ error: "Start date cannot be in the past" });
+    }
+
+    // Check if the end date is in the past
+    if (endDateObj < today) {
+      return res.status(400).json({ error: "End date cannot be in the past" });
+    }
+
+    // Check if the start date is later than the end date
+    if (startDateObj > endDateObj) {
+      return res
+        .status(400)
+        .json({ error: "Start date cannot be later than end date" });
+    }
 
     const existingPerson = await Booking.findOne({ personId });
 
@@ -131,7 +163,7 @@ export const bookingController = {
 
     if (existingBooking) {
       return res
-        .status(400)
+        .status(409)
         .json({ error: "A booking with the same details already exists!!" });
     }
 
@@ -139,7 +171,7 @@ export const bookingController = {
 
     if (!hotelExists) {
       return res
-        .status(400)
+        .status(404)
         .json({ error: "Hotel with ID " + hotelId + " does not exist" });
     }
 
@@ -171,7 +203,6 @@ export const bookingController = {
       savedBooking = await booking.save();
       savedBooking = savedBooking.toObject();
     } catch (error) {
-      console.error(`Error saving booking: ${error}`);
       return res
         .status(500)
         .json({ error: "Error saving booking " + (error as Error).message });
@@ -218,13 +249,34 @@ export const bookingController = {
       startDate,
       endDate,
     } = req.body;
+
+    // Fetch the existing booking
+    const existingBooking = await Booking.findById(req.params.bookingId);
+
+    if (!existingBooking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    // Use the existing start date if a new one isn't provided
+    const startDateObj = startDate
+      ? new Date(startDate)
+      : existingBooking.startDate;
+    const endDateObj = new Date(endDate);
+
+    // Check if the end date is earlier than the start date
+    if (endDateObj < startDateObj) {
+      return res
+        .status(400)
+        .json({ error: "End date cannot be earlier than start date" });
+    }
+
     const update = {
       personId,
       personFirstName,
       personLastName,
       _id,
-      startDate,
-      endDate,
+      startDate: startDateObj,
+      endDate: endDateObj,
     };
 
     let updatedBooking;
@@ -235,14 +287,9 @@ export const bookingController = {
         { new: true }
       );
     } catch (error) {
-      console.error(`Error updating booking: ${error}`);
       return res
         .status(500)
         .json({ error: "Error updating booking " + (error as Error).message });
-    }
-
-    if (!updatedBooking) {
-      return res.status(404).json({ error: "Booking not found" });
     }
 
     res.status(200).json(updatedBooking);
@@ -253,16 +300,19 @@ export const bookingController = {
     try {
       deletedBooking = await Booking.deleteOne({ _id: req.params.bookingId });
     } catch (error) {
-      console.error(`Error deleting booking: ${error}`);
       return res
         .status(500)
-        .json({ error: "Error deleting booking " + (error as Error).message });
+        .json({ error: "Error deleting booking: " + (error as Error).message });
     }
 
     if (deletedBooking.deletedCount === 0) {
-      return res.status(404).json({ error: "Booking not found" });
+      return res.status(404).json({
+        error: `Booking with the ID ${req.params.bookingId} not found`,
+      });
     }
 
-    res.status(200).json({ message: "Booking deleted successfully!" });
+    res.status(200).json({
+      message: `Booking with the ${req.params.bookingId} deleted successfully!`,
+    });
   },
 };

@@ -6,9 +6,14 @@ import logger from "./library/logger";
 import bookingRoutes from "./routes/routes";
 import cors from "cors";
 
-const router = express();
+const app = express();
 
-router.use(cors());
+const corsOptions = {
+  origin: "*",
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
 
 mongoose
   .connect(config.mongo.url, { retryWrites: true, w: "majority" })
@@ -21,7 +26,7 @@ mongoose
   });
 
 const startServer = () => {
-  router.use((req, res, next) => {
+  app.use((req, res, next) => {
     logger.info(
       `Incoming => Method: [${req.method}], Url: [${req.url}] - IP: [${req.socket.remoteAddress}]`
     );
@@ -34,11 +39,10 @@ const startServer = () => {
 
     next();
   });
-  router.use(urlencoded({ extended: true }));
-  router.use(express.json());
+  app.use(urlencoded({ extended: true }));
+  app.use(express.json());
 
-  router.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
+  app.use((req, res, next) => {
     res.header(
       "Access-Control-Allow-Headers",
       "Origin, X-Requested-With, Content-Type, Accept, Authorization"
@@ -55,31 +59,20 @@ const startServer = () => {
     next();
   });
 
-  router.use("/", bookingRoutes);
+  app.use("/", bookingRoutes);
 
-  /**
-   * @openapi
-   * /healthcheck:
-   *  get:
-   *     tags:
-   *     - Healthcheck
-   *     description: Returns API operational status
-   *     responses:
-   *       200:
-   *         description: API is  running
-   */
-  router.get("/healthcheck", (req, res, next) => {
+  app.get("/healthcheck", (req, res, next) => {
     res.status(200).json({ message: "200: The API is up and running." });
   });
 
-  router.use("*", (req, res, next) => {
+  app.use("*", (req, res, next) => {
     const error = new Error("404: Page not Found!");
     logger.error(error);
 
     res.status(404).json({ message: "404: Page not Found!" });
   });
 
-  http.createServer(router).listen(config.server.port, () => {
+  http.createServer(app).listen(config.server.port, () => {
     logger.info("Server running on port " + config.server.port);
   });
 };
