@@ -1,140 +1,66 @@
-src/config: This folder typically contains configuration files for your application. The config.ts file likely includes settings for your application, such as database configuration, API keys, or other settings blog.logrocket.com.
-src/controllers: Controllers accept input and convert it to commands for the model or view. In the context of an Express.js application, controllers are where you define your app's routes and their behaviors. Although this folder is empty in your case, it might later contain files for handling various routes in your application stackoverflow.com.
-src/library: This folder could contain custom classes or functions that can be used across your application. The logger.ts file likely includes functionality for logging, such as writing logs to a file or displaying them in the console stackoverflow.com.
-src/middleware: Middleware functions are functions that have access to the request object (req), the response object (res), and the next function in the application’s request-response cycle. These functions can execute any code, make changes to the request and response objects, end the request-response cycle, or call the next function in the stack. If necessary, they can be used for things like error handling, logging, or user authentication blog.logrocket.com.
-src/models: The models directory usually contains data models for your application, which represent the data structures you're working with. The person.ts file probably defines a Person model, which might represent a person in your application stackoverflow.com.
-src/routers: This folder might contain routing logic for your application. In an Express.js app, routers determine how an application responds to a client request to a particular endpoint, which is a URI (or path) and a specific HTTP request method (GET, POST, etc.) blog.logrocket.com.
+README.md for Node.js, Express, TypeScript, and MongoDB API
+Project Title
+Hotel Booking API
 
-src/config:
-export const config = {
-database: {
-host: 'localhost',
-port: 5432,
-user: 'user',
-password: 'password',
-database: 'hotel_db'
-},
-port: 3000
-};
+Description
+This API is built using Node.js, Express, TypeScript, and MongoDB. It provides endpoints for fetching available hotels based on location, managing bookings, and other hotel-related operations. It also includes validation and error handling mechanisms.
 
-src/config: This directory could include a config.ts file containing configuration settings for your application. For a hotel API, this might include database connection settings, API keys, or other configuration settings. Here's an example of what config.ts might look like:
-export const config = {
-database: {
-host: 'localhost',
-port: 5432,
-user: 'user',
-password: 'password',
-database: 'hotel_db'
-},
-port: 3000
-};
+Table of Contents:
+Getting Started
+Installation
+Running the application
+Endpoints
+Contributing
+Getting Started
 
-src/controllers: This folder will likely contain files that handle requests and responses for your API. For a hotel API, you might have a hotelController.ts file with methods for creating, reading, updating, and deleting hotels. An example method might look like this:
-export function getAllHotels(req, res) {
-// Code to fetch all hotels from the database and return them
-}
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
-src/controllers: This folder will contain the logic for handling requests to your API. Let's consider a controller for handling CRUD operations on hotels. Here's a more detailed example blog.logrocket.com:
-// controllers/hotelController.ts
-import { Request, Response } from 'express';
-import { Hotel } from '../models/hotel';
+Installation:
 
-export const getHotels = async (req: Request, res: Response) => {
-const hotels = await Hotel.find(); // fetch all hotels from the database
-res.json(hotels);
-};
+Clone the repository
+git clone https://github.com/your-username/your-project-name.git
 
-export const getHotel = async (req: Request, res: Response) => {
-const hotel = await Hotel.findById(req.params.id); // fetch a single hotel by its ID
-res.json(hotel);
-};
+cd your-project-name
+Install the dependencies
+npm install
 
-export const createHotel = async (req: Request, res: Response) => {
-const hotel = new Hotel(req.body); // create a new hotel
-await hotel.save();
-res.status(201).json(hotel);
-};
+Copy the .env.example file and create a .env file in the root of your project, and fill it with your MongoDB Atlas connection string
+and other environment variables:
 
-export const updateHotel = async (req: Request, res: Response) => {
-const hotel = await Hotel.findByIdAndUpdate(req.params.id, req.body, { new: true }); // update a hotel by its ID
-res.json(hotel);
-};
+cp .env.example .env
 
-export const deleteHotel = async (req: Request, res: Response) => {
-await Hotel.findByIdAndRemove(req.params.id); // delete a hotel by its ID
-res.status(204).json();
-};
-Then, you would use these controller functions in your hotel routes file:
+MONGO_DB=your_database_name
+MONGO_USER=your_mongodb_username
+MONGO_PW=your_mongodb_password
+PORT=your_preferred_port
+API_KEY=your_api_key
 
-// routers/hotelRouter.ts
-import express from 'express';
-import \* as hotelController from '../controllers/hotelController';
+Running the application
+You can start the application using the following command:
 
-const router = express.Router();
+npm run start
+This will start the API server on the port specified in your .env file.
 
-router.get('/', hotelController.getHotels);
-router.get('/:id', hotelController.getHotel);
-router.post('/', hotelController.createHotel);
-router.put('/:id', hotelController.updateHotel);
-router.delete('/:id', hotelController.deleteHotel);
+Endpoints
+The API has several endpoints for managing hotels and bookings:
 
-export default router;
+GET /hotels: Fetch all nearby hotels based on latitude and longitude provided as query parameters.
+GET /all-hotels: Fetch all hotels from the database.
+GET /hotels/:\_id/bookings: Fetch all bookings for a specific hotel.
+GET /hotels/:hotelId: Fetch a specific hotel from the database.
+GET /bookings/booking: Fetch bookings based on query parameters (personFirstName, personLastName, personId, startDate, endDate).
+GET /bookings: Fetch all bookings from the database.
+POST /bookings: Create a new booking.
+PUT /bookings/:bookingId: Update a specific booking by its ID.
+DELETE /bookings/:bookingId: Delete a specific booking by its ID.
+Contributing
+If you want to contribute to this project and make it better, your help is very welcome. Create a branch on this repository, and once you're done with your changes, open a Pull Request.
 
-src/library: This folder could contain utility files like logger.ts, which might include a class or functions for logging messages to the console or a file. An example logger.ts file might look like this:
-export function log(message: string) {
-console.log(`[${new Date().toISOString()}] ${message}`);
-}
+License
+This project is licensed under the ISC License.
 
-src/middleware: This folder will contain middleware functions for your application. Middleware functions can perform operations on the request and response objects, end the request-response cycle, or call the next function in the stack. For your hotel API, you might have middleware for authenticating users or logging requests. Here's an example of what an authentication middleware might look like:
-export function authenticate(req, res, next) {
-// Code to authenticate the user
-if (req.isAuthenticated()) {
-return next();
-}
-res.redirect('/login');
-}
+Contact
+If you want to contact me, you can reach me at endritlleshi1337@gmail.com.
 
-src/middleware: Let's consider a middleware function for error handling in your hotel API. This function might catch any errors that occur during the processing of a request and send an appropriate response to the client. Here is an example turing.com:
-// middleware/errorHandler.ts
-export function errorHandler(err, req, res, next) {
-if (res.headersSent) {
-return next(err);
-}
-console.error(err);
-res.status(500);
-res.json({ error: 'An error occurred in the server' });
-}
-Then, you would use this middleware in your main server file (assuming it's named app.ts):
-
-// app.ts
-import express from 'express';
-import { errorHandler } from './middleware/errorHandler';
-const app = express();
-app.use(errorHandler);
-
-src/models: This folder will contain data models for your API. For a hotel API, you might have a hotel.ts file that defines a Hotel model. Here's an example of what that might look like:
-export interface Hotel {
-id: number;
-name: string;
-address: string;
-city: string;
-country: string;
-stars: number;
-hasSpa: boolean;
-hasPool: boolean;
-priceCategory: number;
-}
-
-src/routers: This folder will contain routing logic for your API. You might have a hotelRouter.ts file that defines routes for creating, reading, updating, and deleting hotels. Here's an example of what that might look like:
-import express from 'express';
-import \* as hotelController from '../controllers/hotelController';
-
-const router = express.Router();
-
-router.get('/hotels', hotelController.getAllHotels);
-router.post('/hotels', hotelController.createHotel);
-router.get('/hotels/:id', hotelController.getHotel);
-router.put('/hotels/:id', hotelController.updateHotel);
-router.delete('/hotels/:id', hotelController.deleteHotel);
-
-export default router;
+Acknowledgements
+This project was inspired by the need to provide a simple but powerful booking system for hotels.
