@@ -244,6 +244,14 @@ export const bookingController = {
   },
 
   updateBooking: async (req: Request, res: Response) => {
+    try {
+      await Schemas.data.validate(req.body);
+    } catch (error) {
+      if (error instanceof yup.ValidationError) {
+        return res.status(400).json({ error: error.errors.join(", ") });
+      }
+    }
+
     const {
       personId,
       personFirstName,
