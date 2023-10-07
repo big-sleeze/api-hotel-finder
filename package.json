@@ -7,7 +7,8 @@
     "node": "16.x"
   },
   "scripts": {
-    "build": "rm -rf build/ && ./node_modules/.bin/tsc",
+    "preinstall": "npm install -g typescript",
+    "build": "rm -rf build/ && tsc",
     "start": "node build/server.js"
   },
   "author": "E Ll",
